@@ -25,6 +25,12 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
+4. Create a `.env` file in the project root and add your [Google Gemini API key](https://aistudio.google.com/app/apikey)
+```shell
+# .env
+GOOGLE_API_KEY=""
+```
+
 ## Running
 
 ```shell
