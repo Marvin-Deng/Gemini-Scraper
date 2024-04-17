@@ -40,3 +40,9 @@ or
 
 python3 main.py
 ```
+
+## Updating requiements
+
+```shell
+pip freeze > requirements.txt
+```
