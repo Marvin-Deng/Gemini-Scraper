@@ -5,7 +5,7 @@ import google.generativeai as genai
 
 load_dotenv()
 
-genai.configure(api_key=os.getenv("GEMINI_KEY"))
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 model = genai.GenerativeModel("gemini-pro")
 
 
@@ -15,4 +15,4 @@ def gemini_analyze_topics(html_text: str, topics: list) -> str:
         response = model.generate_content(prompt)
         return response.text
     except Exception as e:
-        return f"Gemini returned with error: {e}"
+        return f"Gemini returned with the following error: {e}"

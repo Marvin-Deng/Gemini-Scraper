@@ -34,7 +34,7 @@ pip install -r requirements.txt
 5. Create a `.env` file in the project root and add your [Google Gemini API key](https://aistudio.google.com/app/apikey)
 ```shell
 # .env
-GOOGLE_API_KEY=""
+GEMINI_API_KEY=""
 ```
 
 ## Running
