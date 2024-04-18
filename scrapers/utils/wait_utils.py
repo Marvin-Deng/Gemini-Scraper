@@ -32,3 +32,27 @@ def wait_element_visible_by_id(element_id: str, driver: WebDriver) -> object:
     return WebDriverWait(driver, 10).until(
         EC.visibility_of_element_located((By.ID, element_id))
     )
+
+def wait_element_clickable_by_css(css_selector: str, driver: WebDriver) -> None:
+    """
+    Wait for the element matching the CSS selector to be clickable and then click it.
+
+    Parameters:
+    css_selector (str): CSS selector for the element.
+    driver (WebDriver): The WebDriver instance.
+    """
+    WebDriverWait(driver, 10).until(
+        EC.element_to_be_clickable((By.CSS_SELECTOR, css_selector))
+    ).click()
+
+def wait_element_clickable_by_id(element_id: str, driver: WebDriver) -> None:
+    """
+    Wait for the element with the specified ID to be clickable and then click it.
+
+    Parameters:
+    element_id (str): ID of the element.
+    driver (WebDriver): The WebDriver instance.
+    """
+    WebDriverWait(driver, 10).until(
+        EC.element_to_be_clickable((By.ID, element_id))
+    ).click()
