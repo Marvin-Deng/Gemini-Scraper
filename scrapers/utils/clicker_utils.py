@@ -20,6 +20,16 @@ def click_link_by_id(link_id: str, driver: WebDriver) -> None:
     except NoSuchElementException:
         print(f"Error: Link with ID '{link_id}' not found.")
 
+def click_link_by_css(css_selector: str, driver: WebDriver) -> None:
+    """Click on a link matching the CSS selector."""
+    css_selector = parse_css_selector(css_selector)
+    try:
+        wait_elements_clickable_by_css(css_selector, driver)
+    except TimeoutException:
+        print(f"Timeout: Link with CSS '{css_selector}' not clickable within the wait time.")
+    except NoSuchElementException:
+        print(f"Error: Link with CSS '{css_selector}' not found.")
+
 def wait_element_visible_by_id(element_id: str, driver: WebDriver) -> object:
     return WebDriverWait(driver, 10).until(
         EC.visibility_of_element_located((By.ID, element_id))
