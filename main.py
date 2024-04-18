@@ -15,8 +15,6 @@ def main():
 
     print(gemini_analyze_topics(html, topics))
 
-    time.sleep(2)
-
     scraper.close_driver()
 
 if __name__ == "__main__":
