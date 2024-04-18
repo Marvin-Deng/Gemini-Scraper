@@ -19,3 +19,8 @@ def click_link_by_id(link_id: str, driver: WebDriver) -> None:
         print(f"Timeout: Link with ID '{link_id}' not clickable within the wait time.")
     except NoSuchElementException:
         print(f"Error: Link with ID '{link_id}' not found.")
+
+def wait_element_visible_by_id(element_id: str, driver: WebDriver) -> object:
+    return WebDriverWait(driver, 10).until(
+        EC.visibility_of_element_located((By.ID, element_id))
+    )
