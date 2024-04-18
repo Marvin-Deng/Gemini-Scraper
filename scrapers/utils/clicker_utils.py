@@ -40,6 +40,16 @@ def click_link_by_class(class_name: str, driver: WebDriver) -> None:
     except NoSuchElementException:
         print(f"Error: Link with class '{class_name}' not found.")
 
+def click_next_button_by_css(css_selector: str, driver: WebDriver) -> None:
+    """Click on the first button matching the css."""
+    css_selector = parse_css_selector(css_selector)
+    try:
+        wait_elements_clickable_by_css(css_selector, driver)
+    except TimeoutException as e:
+        raise Exception(f"Timeout occured while waiting to click button: {e}")
+    except Exception as e:
+        raise Exception(f"Clicking button failed with error: {e}")
+
 def wait_element_visible_by_id(element_id: str, driver: WebDriver) -> object:
     return WebDriverWait(driver, 10).until(
         EC.visibility_of_element_located((By.ID, element_id))
