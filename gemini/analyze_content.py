@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 from bs4.element import Comment
 from dotenv import load_dotenv
 import google.generativeai as genai
+import json
 
 load_dotenv()
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
@@ -34,13 +35,25 @@ def split_html_content(html_source: str, chunk_size: int) -> list:
         for i in range(0, len(html_content), chunk_size)
     ]
 
+def generate_prompt(topics, text_chunk):
+    example_json = {
+        "topic": "Example Topic",
+        "info": "Example information about the topic."
+    }
+    return f"""
+    Please analyze the following text and categorize the information according to these topics: {', '.join(topics)}.
+    For each topic, format the information in JSON as shown in this example: {json.dumps(example_json)}.
+    
+    Text to analyze:
+    {text_chunk}
+    """
 
-def gemini_analyze_topics(html_source: str, topics: list) -> str:
+def gemini_analyze_topics(html_source: str, topics: list, json_format:str) -> str:
     content_chunks = split_html_content(html_source, 35000)
     result = []
     for chunk in content_chunks:
         try:
-            prompt = f"Parse the following text and organize the content into the following topics: {', '.join(topics)}.\n\n{chunk} \n\n Output should be a a JSON array with each topic corresponsing to the information retrieved. If the information for a topic cannot be found, "
+            prompt = generate_prompt(topics, chunk)
             response = model.generate_content(prompt)
             if hasattr(response, "prompt_feedback"):
                 print(
