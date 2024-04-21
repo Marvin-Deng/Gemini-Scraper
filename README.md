@@ -52,3 +52,9 @@ python3 main.py
 ```shell
 pip freeze > requirements.txt
 ```
+
+## Running Tests
+
+```shell
+python -m unittest
+```
