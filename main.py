@@ -1,7 +1,8 @@
 import time
 
 from scrapers.gemini_scraper import GeminiScraper
-from gemini.model import gemini_analyze_topics
+from gemini.analyze_content import gemini_analyze_topics
+from gemini.link_extractor import get_relevant_links
 
 
 def main():
@@ -13,7 +14,9 @@ def main():
     html = scraper.get_page_source()
     topics = ['Early days of the company', 'List of products', 'Important people in the company']
 
-    print(gemini_analyze_topics(html, topics))
+    # gemini_analyze_topics(html, topics)
+
+    print(get_relevant_links(html, topics))
 
     scraper.close_driver()
 

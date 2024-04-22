@@ -1,4 +1,5 @@
 import os
+import re
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 import google.generativeai as genai
@@ -8,22 +9,51 @@ genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 model = genai.GenerativeModel("gemini-pro")
 
 
-def extract_links(html_source: str) -> list:
+def extract_links(html_source: str) -> str:
     soup = BeautifulSoup(html_source, "html.parser")
     links = []
     for link in soup.find_all("a"):
-        links.append(link.get("href"))
+        href = link.get("href")
+        if href is not None:
+            individual_hrefs = re.split(
+                r"https?://", href
+            )  # Split links that are appended together
+            for link in individual_hrefs:
+                links.append(link)
     return links
 
 
-def get_relevant_links(html_source: str, topics: list) -> str:
+def get_link_chunks(links: list, chunk_size: int) -> list:
+    chunks = []
+    current_chunk = ""
+    for link in links:
+        if len(current_chunk) + len(link) + 1 > chunk_size:
+            chunks.append(current_chunk.strip())
+            current_chunk = link
+        else:
+            current_chunk += link + " "
+    if current_chunk:
+        chunks.append(current_chunk.strip())
+
+    return chunks
+
+
+def get_relevant_links(html_source: str, topics: list) -> list:
     links = extract_links(html_source)
-    try:
-        prompt = f"""Analyze the provided links and topics, and advise on which links to click next to find relevant information about each topic. Topics: {', '.join(topics)}. Links: {', '.join(links)}. 
-                    Please respond with a comma separated list of recommended links. 
-                    If no links are found, return the string "None"
-                    """
-        response = model.generate_content(prompt)
-    except Exception as e:
-        return f"Gemini returned with the following error: {e}"
-    return response.text
+    link_chunks = get_link_chunks(links, chunk_size=35000)
+    print(link_chunks)
+    result = []
+    for chunk in link_chunks:
+        try:
+            prompt = f"""
+                        Analyze the provided links and topics, and advise on which links to click next to find relevant information about each topic. 
+                        Topics: {', '.join(topics)}. Links: {chunk}. 
+                        Please respond with a JSON object containing the recommended links for each topic. 
+                        If no links are found, return ""
+                      """
+            response = model.generate_content(prompt)
+            print(response.text)
+            result.append(response.text)
+        except Exception as e:
+            return f"Gemini returned with the following error: {e}"
+    return result
