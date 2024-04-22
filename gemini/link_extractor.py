@@ -1,5 +1,6 @@
 import os
-import re
+import json
+from urllib.parse import urljoin
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 import google.generativeai as genai
@@ -19,14 +20,15 @@ def extract_links(html_source: str) -> str:
     Returns:
         list: A list of extracted links.
     """
+    base_url = "(link unavailable)"
     soup = BeautifulSoup(html_source, "html.parser")
     links = []
     for link in soup.find_all("a"):
         href = link.get("href")
-        if href is not None:
-            individual_hrefs = re.split(r"https?://", href)
-            for link in individual_hrefs:
-                links.append(link)
+        if href is not None and not href.endswith(".jpg"):
+            absolute_url = urljoin(base_url, href).replace("*", "")
+            if absolute_url.startswith("http"):
+                links.append(absolute_url)
     return links
 
 
@@ -55,7 +57,7 @@ def get_link_chunks(links: list, chunk_size: int) -> list:
     return chunks
 
 
-def get_relevant_links(html_source: str, topics: list) -> list:
+def get_relevant_links(html_source: str, topics: list) -> dict:
     """
     Extracts relevant links from the given HTML source based on the provided topics.
 
@@ -68,17 +70,26 @@ def get_relevant_links(html_source: str, topics: list) -> list:
     """
     links = extract_links(html_source)
     link_chunks = get_link_chunks(links, chunk_size=35000)
-    result = []
+    result = {}
     for chunk in link_chunks:
         try:
             prompt = f"""
-                        Analyze the provided links and topics, and advise on which links to click next to find relevant information about each topic. 
+                        Analyze the provided links and topics, and advise on only the most relevant links about each topic. 
                         Topics: {', '.join(topics)}. Links: {chunk}. 
-                        Please respond with a JSON object containing the recommended links for each topic. 
+                        Respond with a JSON object containing the recommended links for each topic. 
+                        Don't include the JSON header
                         If no links are found, return ""
-                      """
+                    """.strip()
             response = model.generate_content(prompt)
-            result.append(response.text)
-        except Exception as e:
-            return f"Gemini returned with the following error: {e}"
+            response_json = json.loads(response.text)
+            for topic, links in response_json.items():
+                if links is not None:
+                    if topic not in result:
+                        result[topic] = []
+                    if isinstance(links, list):
+                        result[topic].extend(links)
+                    else:
+                        result[topic].append(links)
+        except Exception:
+            pass
     return result
