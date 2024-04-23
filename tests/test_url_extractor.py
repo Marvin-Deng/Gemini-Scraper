@@ -1,5 +1,5 @@
 import unittest
-from gemini.link_extractor import get_base_url, get_relevant_links, extract_links
+from gemini.link_extractor import get_base_url, extract_links
 
 
 class TestGetBaseUrl(unittest.TestCase):
@@ -68,6 +68,25 @@ class TestExtractLinks(unittest.TestCase):
         ]
         result = extract_links(base_url, html)
         self.assertEqual(result, expected)
+
+    def test_exclude_image_links(self):
+        html_source = """
+        <html>
+            <body>
+                <a href="https://example.com/image.jpg">Image Link</a>
+                <a href="https://example.com/image.jpeg">JPEG Image</a>
+                <a href="https://example.com/image.png">PNG Image</a>
+                <a href="https://example.com/image.gif">GIF Image</a>
+                <a href="https://example.com/page.html">Normal Link</a>
+            </body>
+        </html>
+        """
+        base_url = "https://example.com"
+        expected_links = [
+            {"url": "https://example.com/page.html", "text": "Normal Link"}
+        ]
+        result = extract_links(base_url, html_source)
+        self.assertEqual(result, expected_links)
 
     def test_empty_html_with_no_links(self):
         html_source = ""

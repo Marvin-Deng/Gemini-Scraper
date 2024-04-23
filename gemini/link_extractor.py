@@ -32,7 +32,7 @@ def extract_links(base_url: str, html_source: str) -> list:
     for link in soup.find_all("a"):
         href = link.get("href")
         link_text = link.text.strip()
-        if href and not href.endswith(".jpg"):
+        if href and not href.lower().endswith(('.jpg', '.jpeg', '.png', '.gif', '.bmp')):
             absolute_url = (
                 urljoin(base_url, href)
                 if not href.startswith(("http:", "https:"))
