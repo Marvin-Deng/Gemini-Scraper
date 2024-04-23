@@ -38,7 +38,6 @@ def extract_links(base_url: str, html_source: str) -> list:
                 if not href.startswith(("http:", "https:"))
                 else href
             )
-            absolute_url = absolute_url.replace("*", "")
             links.append({"url": absolute_url, "text": link_text})
     return links
 
@@ -90,7 +89,8 @@ def get_relevant_links(url: str, html_source: str, topics: list) -> dict:
                         Analyze the provided links and topics, and advise on only the most relevant links about each topic. 
                         Topics: {', '.join(topics)}. Links: {chunk}. 
                         Respond with a JSON object containing the recommended links for each topic. 
-                        Don't include the JSON header
+                        Only include the links, not the text.
+                        Don't include the JSON header.
                         If no links are found, return ""
                     """.strip()
             response = model.generate_content(prompt)
