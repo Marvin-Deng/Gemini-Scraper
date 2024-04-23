@@ -16,7 +16,7 @@ def main():
 
     # gemini_analyze_topics(html, topics)
 
-    print(get_relevant_links(html, topics))
+    print(get_relevant_links(url, html, topics))
 
     scraper.close_driver()
 
