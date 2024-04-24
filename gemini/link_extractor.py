@@ -3,6 +3,7 @@ import json
 from urllib.parse import urlparse, urljoin
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
+import concurrent.futures
 import google.generativeai as genai
 
 load_dotenv()
@@ -32,7 +33,7 @@ def extract_links(base_url: str, html_source: str) -> list:
     for link in soup.find_all("a"):
         href = link.get("href")
         link_text = link.text.strip()
-        if href and not href.lower().endswith(('.jpg', '.jpeg', '.png', '.gif', '.bmp')):
+        if href and not href.lower().endswith((".jpg", ".jpeg", ".png", ".gif", ".bmp")):
             absolute_url = (
                 urljoin(base_url, href)
                 if not href.startswith(("http:", "https:"))
@@ -68,6 +69,23 @@ def get_link_chunks(links: list, chunk_size: int) -> list:
     return chunks
 
 
+def process_chunk(chunk, topics):
+    try:
+        prompt = f"""
+            Analyze the provided links and topics, and advise on only the most relevant links about each topic. 
+            Topics: {', '.join(topics)}. Links: {chunk}.
+            Respond with a JSON object containing the recommended links for each topic. 
+            Only include the links, not the text.
+            Don't include the JSON header.
+            If no links are found, return ""
+        """.strip()
+        response = model.generate_content(prompt)
+        return json.loads(response.text)
+        
+    except Exception:
+        return {}
+
+
 def get_relevant_links(url: str, html_source: str, topics: list) -> dict:
     """
     Extracts relevant links from the given HTML source based on the provided topics.
@@ -82,27 +100,16 @@ def get_relevant_links(url: str, html_source: str, topics: list) -> dict:
     base_url = get_base_url(url)
     links_dict = extract_links(base_url, html_source)
     link_chunks = get_link_chunks(links_dict, chunk_size=35000)
-    result = {}
-    for chunk in link_chunks:
-        try:
-            prompt = f"""
-                        Analyze the provided links and topics, and advise on only the most relevant links about each topic. 
-                        Topics: {', '.join(topics)}. Links: {chunk}. 
-                        Respond with a JSON object containing the recommended links for each topic. 
-                        Only include the links, not the text.
-                        Don't include the JSON header.
-                        If no links are found, return ""
-                    """.strip()
-            response = model.generate_content(prompt)
-            response_json = json.loads(response.text)
-            for topic, links in response_json.items():
-                if links is not None:
-                    if topic not in result:
-                        result[topic] = []
-                    if isinstance(links, list):
-                        result[topic].extend(links)
-                    else:
-                        result[topic].append(links)
-        except Exception:
-            pass
+    result = {topic: [] for topic in topics}
+
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        futures = [
+            executor.submit(process_chunk, chunk, topics) for chunk in link_chunks
+        ]
+        for future in concurrent.futures.as_completed(futures):
+            chunk_result = future.result()
+            for topic, links in chunk_result.items():
+                if links:
+                    result[topic].extend(links if isinstance(links, list) else [links])
+
     return result
