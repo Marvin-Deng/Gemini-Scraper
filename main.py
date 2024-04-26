@@ -1,11 +1,11 @@
-from scrapers.gemini_scraper import GeminiScraper
+from crawler.scraper import Scraper
 from gemini.analyze_content import gemini_analyze_topics
 from gemini.link_extractor import get_relevant_links
 
 
 def main():
     url = "https://en.wikipedia.org/wiki/Apple_Inc."
-    scraper = GeminiScraper(url)
+    scraper = Scraper(url)
 
     html = scraper.get_page_source()
     topics = ['Early days of the company', 'List of products', 'Important people in the company']
