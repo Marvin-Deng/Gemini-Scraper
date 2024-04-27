@@ -75,7 +75,8 @@ def process_chunk(chunk, topics):
             Analyze the provided links and topics, and advise on only the most relevant links about each topic. 
             Topics: {', '.join(topics)}. Links: {chunk}.
             Respond with a JSON object containing the recommended links for each topic. 
-            Only include the links, not the text. Example: https://en.wikipedia.org/wiki/VM2000
+            Only return the urls. Do not include the text related to the url.
+            Include a space between each link
             Don't include the JSON header.
             If no links are found, return ""
         """.strip()
