@@ -42,11 +42,6 @@ def gemini_analyze_topics(html_source: str, topics: list) -> str:
         try:
             prompt = f"Parse the following text and organize the content into the following topics: {', '.join(topics)}.\n\n{chunk} \n\n Output should be a a JSON array with each topic corresponsing to the information retrieved. If the information for a topic cannot be found, "
             response = model.generate_content(prompt)
-            if hasattr(response, "prompt_feedback"):
-                print(
-                    f"Prompt was blocked or failed, feedback: {response.prompt_feedback}"
-                )
-            print(response.text)
             result.append(response.text)
         except Exception as e:
             return f"Gemini returned with the following error: {e}"
