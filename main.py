@@ -1,20 +1,17 @@
-from scrapers.gemini_scraper import GeminiScraper
+from crawler.scraper import Scraper
 from gemini.analyze_content import gemini_analyze_topics
 from gemini.link_extractor import get_relevant_links
+from crawler.crawler import Crawler
 
 
 def main():
     url = "https://en.wikipedia.org/wiki/Apple_Inc."
-    scraper = GeminiScraper(url)
-
-    html = scraper.get_page_source()
     topics = ['Early days of the company', 'List of products', 'Important people in the company']
+    max_depth = 3
 
-    # gemini_analyze_topics(html, topics)
+    crawler = Crawler(url, topics, max_depth)
+    crawler.bfs_crawl()
 
-    print(get_relevant_links(url, html, topics))
-
-    scraper.close_driver()
 
 if __name__ == "__main__":
     main()

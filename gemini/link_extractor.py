@@ -75,9 +75,11 @@ def process_chunk(chunk, topics):
             Analyze the provided links and topics, and advise on only the most relevant links about each topic. 
             Topics: {', '.join(topics)}. Links: {chunk}.
             Respond with a JSON object containing the recommended links for each topic. 
-            Only include the links, not the text.
             Don't include the JSON header.
-            If no links are found, return ""
+            Only return the urls. DO NOT include the text related to the url. 
+            Only return the relevant urls.
+            Include a space between each link.
+            If no links are found, return "".
         """.strip()
         response = model.generate_content(prompt)
         return json.loads(response.text)
