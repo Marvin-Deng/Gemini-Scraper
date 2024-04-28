@@ -3,7 +3,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
 
-class GeminiScraper:
+class Scraper:
 
     def __init__(self, url: str):
         self.curr_url = url

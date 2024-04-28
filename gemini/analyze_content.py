@@ -55,11 +55,6 @@ def gemini_analyze_topics(html_source: str, topics: list, json_format:str) -> st
         try:
             prompt = generate_prompt(topics, chunk)
             response = model.generate_content(prompt)
-            if hasattr(response, "prompt_feedback"):
-                print(
-                    f"Prompt was blocked or failed, feedback: {response.prompt_feedback}"
-                )
-            print(response.text)
             result.append(response.text)
         except Exception as e:
             return f"Gemini returned with the following error: {e}"
