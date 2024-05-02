@@ -1,27 +1,23 @@
-import time
-
-from scrapers.gemini_scraper import GeminiScraper
-from gemini.model import gemini_analyze_topics
+from crawler.scraper import Scraper
+from gemini.analyze_content import gemini_analyze_topics
+from gemini.link_extractor import get_relevant_links
+from crawler.crawler import Crawler
 
 
 def main():
-    json_format = """
-    {
-    "topics": str,
-    "info": str,
-    }
-    """
+    # json_format = """
+    # {
+    # "topics": str,
+    # "info": str,
+    # }
+    # """
 
     url = "https://en.wikipedia.org/wiki/Apple_Inc."
-    scraper = GeminiScraper(url)
-
-    time.sleep(2)
-
-    html = scraper.get_page_source()
     topics = ['Early days of the company', 'List of products', 'Important people in the company']
     max_depth = 3
 
-    print(gemini_analyze_topics(html, topics))
+    crawler = Crawler(url, topics, max_depth)
+    crawler.bfs_crawl()
 
 
 if __name__ == "__main__":
