@@ -4,3 +4,6 @@ venv
 
 # Driver
 downloaded_files/
+
+# Python
+__pycache__/
