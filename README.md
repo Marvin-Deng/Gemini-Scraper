@@ -56,5 +56,12 @@ pip freeze > requirements.txt
 ## Running Tests
 
 ```shell
+# Unit tests
 python -m unittest
+
+# Link extractor script
+python3 gemini/link_extractor.py
+
+# Content extractor script
+python3 gemini/analyze_content.py
 ```

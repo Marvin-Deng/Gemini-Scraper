@@ -3,7 +3,7 @@ from bs4.element import Comment
 import json
 import requests
 
-from utils.model import configure_gemini
+from gemini.model import configure_gemini
 
 
 model = configure_gemini()
