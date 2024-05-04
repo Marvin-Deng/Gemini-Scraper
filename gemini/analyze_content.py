@@ -38,31 +38,29 @@ def split_html_content(html_source: str, chunk_size: int) -> list:
     ]
 
 def generate_prompt(topics, text_chunk):
-    example_json = {
-        topics[0]: "Relevant information about topic one.",
-        topics[1]: "Relevant information about topic two.",
-        topics[2]: "Relevant information about topic three."
-    }
-    return f"""
+    example_json = {topic: f"Relevant information about {topic.lower()}." for topic in topics}
+    
+    formatted_json_example = json.dumps(example_json, indent=4)
+    formatted_json_example = formatted_json_example.replace('",\n', '",\n\n')
+    
+    prompt = f"""
     Please analyze the following text and categorize the information according to these topics: {', '.join(topics)}.
-    For each topic, format the information in JSON as shown in this example: {json.dumps(example_json, indent=2)}.
+    For each topic, format the information in JSON as shown in this example:
+    {formatted_json_example}
 
     Text to analyze:
     {text_chunk}
     """
+    return prompt
 
-def gemini_analyze_topics(html_source: str, topics: list) -> str:
+def gemini_analyze_topics(html_source: str, topics: list) -> list:
     content_chunks = split_html_content(html_source, 35000)
     results = []
     for chunk in content_chunks:
         prompt = generate_prompt(topics, chunk)
         response = model.generate_content(prompt)
-        results.append(response.text)
-        if response.text.strip():
-            try:
-                results.append(response.text)
-            except Exception as e:
-                results.append("Error processing the chunk")
+        if response.text.strip():  # Check if response is not empty
+            results.append(response.text)
         else:
             results.append("Empty or invalid response")
     return results

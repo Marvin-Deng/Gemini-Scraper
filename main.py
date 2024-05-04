@@ -5,12 +5,6 @@ from crawler.crawler import Crawler
 
 
 def main():
-    # json_format = """
-    # {
-    # "topics": str,
-    # "info": str,
-    # }
-    # """
 
     url = "https://en.wikipedia.org/wiki/Apple_Inc."
     topics = ['Early days of the company', 'List of products', 'Important people in the company']
