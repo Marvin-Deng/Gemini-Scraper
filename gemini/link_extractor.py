@@ -1,14 +1,11 @@
-import os
 import json
 from urllib.parse import urlparse, urljoin
 from bs4 import BeautifulSoup
-from dotenv import load_dotenv
 import concurrent.futures
-import google.generativeai as genai
 
-load_dotenv()
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-model = genai.GenerativeModel("gemini-pro")
+from utils.model import configure_gemini
+
+model = configure_gemini()
 
 
 def get_base_url(url: str) -> str:
@@ -33,7 +30,9 @@ def extract_links(base_url: str, html_source: str) -> list:
     for link in soup.find_all("a"):
         href = link.get("href")
         link_text = link.text.strip()
-        if href and not href.lower().endswith((".jpg", ".jpeg", ".png", ".gif", ".bmp")):
+        if href and not href.lower().endswith(
+            (".jpg", ".jpeg", ".png", ".gif", ".bmp")
+        ):
             absolute_url = (
                 urljoin(base_url, href)
                 if not href.startswith(("http:", "https:"))
@@ -83,7 +82,7 @@ def process_chunk(chunk, topics):
         """.strip()
         response = model.generate_content(prompt)
         return json.loads(response.text)
-        
+
     except Exception:
         return {}
 
