@@ -3,6 +3,9 @@ from bs4 import BeautifulSoup
 from bs4.element import Comment
 from dotenv import load_dotenv
 import google.generativeai as genai
+import json
+import requests
+
 
 load_dotenv()
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
@@ -26,7 +29,7 @@ def tag_visible(element):
 
 def split_html_content(html_source: str, chunk_size: int) -> list:
     soup = BeautifulSoup(html_source, "html.parser")
-    text = soup.find_all(text=True)
+    text = soup.find_all(string=True) 
     visible_text = filter(tag_visible, text)
     html_content = " ".join(t.strip() for t in visible_text)
     return [
@@ -34,15 +37,49 @@ def split_html_content(html_source: str, chunk_size: int) -> list:
         for i in range(0, len(html_content), chunk_size)
     ]
 
+def generate_prompt(topics, text_chunk):
+    example_json = {topic: f"Relevant information about {topic.lower()}." for topic in topics}
+    
+    formatted_json_example = json.dumps(example_json, indent=4)
+    formatted_json_example = formatted_json_example.replace('",\n', '",\n\n')
+    
+    prompt = f"""
+    Please analyze the following text and categorize the information according to these topics: {', '.join(topics)}.
+    For each topic, format the information in JSON as shown in this example:
+    {formatted_json_example}
 
-def gemini_analyze_topics(html_source: str, topics: list) -> str:
+    Text to analyze:
+    {text_chunk}
+    """
+    return prompt
+
+def gemini_analyze_topics(html_source: str, topics: list) -> list:
     content_chunks = split_html_content(html_source, 35000)
-    result = []
+    results = []
     for chunk in content_chunks:
-        try:
-            prompt = f"Parse the following text and organize the content into the following topics: {', '.join(topics)}.\n\n{chunk} \n\n Output should be a a JSON array with each topic corresponsing to the information retrieved. If the information for a topic cannot be found, "
-            response = model.generate_content(prompt)
-            result.append(response.text)
-        except Exception as e:
-            return f"Gemini returned with the following error: {e}"
-    return result
+        prompt = generate_prompt(topics, chunk)
+        response = model.generate_content(prompt)
+        if response.text.strip():  # Check if response is not empty
+            results.append(response.text)
+        else:
+            results.append("Empty or invalid response")
+    return results
+
+
+def fetch_html(url: str) -> str:
+    try:
+        response = requests.get(url)
+        response.raise_for_status() 
+        return response.text
+    except requests.RequestException as e:
+        return str(e)
+
+
+if __name__ == "__main__":
+    url = "https://en.wikipedia.org/wiki/Apple_Inc."
+    html_source = fetch_html(url)
+    topics = ['Early days of the company', 'List of products', 'Important people in the company']
+    if html_source.startswith("http"):
+        print("Failed to fetch URL:", html_source)
+    else:
+        print(gemini_analyze_topics(html_source, topics))

@@ -5,6 +5,7 @@ from crawler.crawler import Crawler
 
 
 def main():
+
     url = "https://en.wikipedia.org/wiki/Apple_Inc."
     topics = ['Early days of the company', 'List of products', 'Important people in the company']
     max_depth = 3
