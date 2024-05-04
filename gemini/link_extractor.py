@@ -77,7 +77,7 @@ def __process_chunk(chunk, topics):
             Respond with a JSON object containing the recommended links for each topic. 
             Don't include the JSON header.
             Only return the urls. DO NOT include the text related to the url. 
-            Only return the relevant urls.
+            Only return the most relevant urls to each topic.
             Include a space between each link.
             If no links are found, return "".
         """.strip()
