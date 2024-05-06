@@ -1,15 +1,12 @@
-import os
 from bs4 import BeautifulSoup
 from bs4.element import Comment
-from dotenv import load_dotenv
-import google.generativeai as genai
 import json
 import requests
 
+from gemini.model import configure_gemini
 
-load_dotenv()
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-model = genai.GenerativeModel("gemini-pro")
+
+model = configure_gemini()
 
 
 def tag_visible(element):
@@ -29,7 +26,7 @@ def tag_visible(element):
 
 def split_html_content(html_source: str, chunk_size: int) -> list:
     soup = BeautifulSoup(html_source, "html.parser")
-    text = soup.find_all(string=True) 
+    text = soup.find_all(string=True)
     visible_text = filter(tag_visible, text)
     html_content = " ".join(t.strip() for t in visible_text)
     return [
@@ -37,12 +34,15 @@ def split_html_content(html_source: str, chunk_size: int) -> list:
         for i in range(0, len(html_content), chunk_size)
     ]
 
+
 def generate_prompt(topics, text_chunk):
-    example_json = {topic: f"Relevant information about {topic.lower()}." for topic in topics}
-    
+    example_json = {
+        topic: f"Relevant information about {topic.lower()}." for topic in topics
+    }
+
     formatted_json_example = json.dumps(example_json, indent=4)
     formatted_json_example = formatted_json_example.replace('",\n', '",\n\n')
-    
+
     prompt = f"""
     Please analyze the following text and categorize the information according to these topics: {', '.join(topics)}.
     For each topic, format the information in JSON as shown in this example:
@@ -52,6 +52,7 @@ def generate_prompt(topics, text_chunk):
     {text_chunk}
     """
     return prompt
+
 
 def gemini_analyze_topics(html_source: str, topics: list) -> list:
     content_chunks = split_html_content(html_source, 35000)
@@ -69,7 +70,7 @@ def gemini_analyze_topics(html_source: str, topics: list) -> list:
 def fetch_html(url: str) -> str:
     try:
         response = requests.get(url)
-        response.raise_for_status() 
+        response.raise_for_status()
         return response.text
     except requests.RequestException as e:
         return str(e)
@@ -78,7 +79,11 @@ def fetch_html(url: str) -> str:
 if __name__ == "__main__":
     url = "https://en.wikipedia.org/wiki/Apple_Inc."
     html_source = fetch_html(url)
-    topics = ['Early days of the company', 'List of products', 'Important people in the company']
+    topics = [
+        "Early days of the company",
+        "List of products",
+        "Important people in the company",
+    ]
     if html_source.startswith("http"):
         print("Failed to fetch URL:", html_source)
     else:

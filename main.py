@@ -11,7 +11,7 @@ def main():
     max_depth = 3
 
     crawler = Crawler(url, topics, max_depth)
-    crawler.bfs_crawl()
+    print(crawler.bfs_crawl())
 
 
 if __name__ == "__main__":

@@ -7,7 +7,6 @@ headers = {
 }
 
 def get_html_from_url(url: str) -> str:
-    print(f"Parsing: {url}")
     response = requests.get(url, headers=headers)
     html = response.text
     soup = BeautifulSoup(html, "html.parser")
