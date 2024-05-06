@@ -10,10 +10,6 @@ cd Gemini-Scraper
 
 2. Create a virtual environment
 ```shell
-python -m venv venv
-
-or
-
 python3 -m venv venv
 ```
 
@@ -24,6 +20,9 @@ venv\Scripts\activate
 
 # Mac
 source venv/bin/activate
+
+# To switch your Python interpreter path
+./backend/venv/bin/python
 ```
 
 4. Install requirements
