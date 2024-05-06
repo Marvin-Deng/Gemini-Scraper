@@ -18,7 +18,6 @@ async def crawl(request: CrawlRequest):
     try:
         crawler = Crawler(request.url, request.topics, request.max_depth)
         result = crawler.bfs_crawl()
-        print(result)
         return JSONResponse(
             status_code=200, content={"data": result}
         )

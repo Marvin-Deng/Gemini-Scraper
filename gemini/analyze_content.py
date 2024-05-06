@@ -41,13 +41,13 @@ def generate_prompt(topics, text_chunk):
     }
 
     formatted_json_example = json.dumps(example_json, indent=4)
-    formatted_json_example = formatted_json_example.replace('",\n', '",\n\n')
 
     prompt = f"""
     Please analyze the following text and categorize the information according to these topics: {', '.join(topics)}.
     If there are no relevant info found regarding the topic, return "" for that topic.
-    For each topic, format the information in JSON as shown in this example:
+    For each topic, format the information into a JSON object as shown in this example:
     {formatted_json_example}
+    Don't include the JSON header.
 
     Text to analyze:
     {text_chunk}
@@ -62,7 +62,7 @@ def gemini_analyze_topics(url: str, html_source: str, topics: list) -> list:
         prompt = generate_prompt(topics, chunk)
         response = model.generate_content(prompt)
         if response.text.strip():  # Check if response is not empty
-            topic_info.append(response.text)
+            topic_info.append(json.loads(response.text))
     return {"url": url, "info": topic_info}
 
 
