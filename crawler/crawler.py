@@ -68,9 +68,8 @@ class Crawler:
                     for topic, urls in topic_url_dict.items():
                         for url in urls:
                             if url not in self.visited:
-                                if url not in self.visited:
-                                    self.queue.append(url)
-                                    self.visited.add(url)
+                                self.queue.append(url)
+                                self.visited.add(url)
                 self.curr_depth -= 1
 
         return info
