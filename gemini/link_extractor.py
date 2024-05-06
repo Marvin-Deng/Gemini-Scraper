@@ -4,7 +4,7 @@ from urllib.parse import urlparse, urljoin
 from bs4 import BeautifulSoup
 import concurrent.futures
 
-from model import configure_gemini
+from gemini.model import configure_gemini
 
 model = configure_gemini()
 
