@@ -1,18 +1,27 @@
-from crawler.scraper import Scraper
-from gemini.analyze_content import gemini_analyze_topics
-from gemini.link_extractor import get_relevant_links
+from fastapi import FastAPI
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel
+
 from crawler.crawler import Crawler
 
-
-def main():
-
-    url = "https://en.wikipedia.org/wiki/Apple_Inc."
-    topics = ['Early days of the company', 'List of products', 'Important people in the company']
-    max_depth = 3
-
-    crawler = Crawler(url, topics, max_depth)
-    print(crawler.bfs_crawl())
+app = FastAPI()
 
 
-if __name__ == "__main__":
-    main()
+class CrawlRequest(BaseModel):
+    url: str
+    topics: list
+    max_depth: int
+
+
+@app.post("/crawl/")
+async def crawl(request: CrawlRequest):
+    try:
+        crawler = Crawler(request.url, request.topics, request.max_depth)
+        result = crawler.bfs_crawl()
+        return JSONResponse(
+            status_code=200, content={"data": result}
+        )
+    except Exception as e:
+        return JSONResponse(
+            status_code=500, content={"message": f"An error occurred: {str(e)}"}
+        )

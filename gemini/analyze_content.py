@@ -41,12 +41,13 @@ def generate_prompt(topics, text_chunk):
     }
 
     formatted_json_example = json.dumps(example_json, indent=4)
-    formatted_json_example = formatted_json_example.replace('",\n', '",\n\n')
 
     prompt = f"""
     Please analyze the following text and categorize the information according to these topics: {', '.join(topics)}.
-    For each topic, format the information in JSON as shown in this example:
+    If there are no relevant info found regarding the topic, return "" for that topic.
+    For each topic, format the information into a JSON object as shown in this example:
     {formatted_json_example}
+    Don't include the JSON header.
 
     Text to analyze:
     {text_chunk}
@@ -54,17 +55,15 @@ def generate_prompt(topics, text_chunk):
     return prompt
 
 
-def gemini_analyze_topics(html_source: str, topics: list) -> list:
+def gemini_analyze_topics(url: str, html_source: str, topics: list) -> list:
     content_chunks = split_html_content(html_source, 35000)
-    results = []
+    topic_info = []
     for chunk in content_chunks:
         prompt = generate_prompt(topics, chunk)
         response = model.generate_content(prompt)
         if response.text.strip():  # Check if response is not empty
-            results.append(response.text)
-        else:
-            results.append("Empty or invalid response")
-    return results
+            topic_info.append(json.loads(response.text))
+    return {"url": url, "info": topic_info}
 
 
 def fetch_html(url: str) -> str:
@@ -87,4 +86,4 @@ if __name__ == "__main__":
     if html_source.startswith("http"):
         print("Failed to fetch URL:", html_source)
     else:
-        print(gemini_analyze_topics(html_source, topics))
+        print(gemini_analyze_topics(url, html_source, topics))
