@@ -7,3 +7,6 @@ downloaded_files/
 
 # Python
 __pycache__/
+
+# Testing
+*.json

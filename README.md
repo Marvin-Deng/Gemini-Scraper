@@ -40,22 +40,16 @@ GEMINI_API_KEY=""
 ## Running
 
 ```shell
-python main.py
-
-or 
-
-python3 main.py
-```
-
-## Updating requirements
-
-```shell
-pip freeze > requirements.txt
+# Start server
+uvicorn main:app --reload
 ```
 
 ## Running Tests
 
 ```shell
+# Timing and response script
+python3 tests/test_timing.py
+
 # Unit tests
 python -m unittest
 
@@ -64,4 +58,10 @@ python3 gemini/link_extractor.py
 
 # Content extractor script
 python3 gemini/analyze_content.py
+```
+
+## Updating requirements
+
+```shell
+pip freeze > requirements.txt
 ```
