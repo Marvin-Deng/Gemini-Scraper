@@ -4,7 +4,7 @@ from urllib.parse import urlparse, urljoin
 from bs4 import BeautifulSoup
 import concurrent.futures
 
-from gemini.model import configure_gemini
+from model import configure_gemini
 
 model = configure_gemini()
 
@@ -77,9 +77,8 @@ def __process_chunk(chunk, topics):
             Respond with a JSON object containing the recommended links for each topic. 
             Don't include the JSON header.
             Only return the urls. DO NOT include the text related to the url. 
-            Only return the most relevant urls to each topic.
+            Only return the 3 most relevant urls to each topic. If there are no relevant links found for the topic, return ""
             Include a space between each link.
-            If no links are found, return "".
         """.strip()
         response = model.generate_content(prompt)
         return json.loads(response.text)

@@ -3,7 +3,7 @@ from bs4.element import Comment
 import json
 import requests
 
-from gemini.model import configure_gemini
+from model import configure_gemini
 
 
 model = configure_gemini()
@@ -45,6 +45,7 @@ def generate_prompt(topics, text_chunk):
 
     prompt = f"""
     Please analyze the following text and categorize the information according to these topics: {', '.join(topics)}.
+    If there are no relevant info found for the topic, return "" for that topic.
     For each topic, format the information in JSON as shown in this example:
     {formatted_json_example}
 
@@ -54,17 +55,15 @@ def generate_prompt(topics, text_chunk):
     return prompt
 
 
-def gemini_analyze_topics(html_source: str, topics: list) -> list:
+def gemini_analyze_topics(url: str, html_source: str, topics: list) -> list:
     content_chunks = split_html_content(html_source, 35000)
-    results = []
+    topic_info = []
     for chunk in content_chunks:
         prompt = generate_prompt(topics, chunk)
         response = model.generate_content(prompt)
         if response.text.strip():  # Check if response is not empty
-            results.append(response.text)
-        else:
-            results.append("Empty or invalid response")
-    return results
+            topic_info.append(response.text)
+    return {"url": url, "data": topic_info}
 
 
 def fetch_html(url: str) -> str:
@@ -87,4 +86,4 @@ if __name__ == "__main__":
     if html_source.startswith("http"):
         print("Failed to fetch URL:", html_source)
     else:
-        print(gemini_analyze_topics(html_source, topics))
+        print(gemini_analyze_topics(url, html_source, topics))

@@ -30,7 +30,7 @@ class Crawler:
         # print(f"Extracting URL: {url}")
         try:
             html_source = get_html_from_url(url)
-            analyzed_topics = gemini_analyze_topics(html_source, self.topics)
+            analyzed_topics = gemini_analyze_topics(url, html_source, self.topics)
             topic_url_dict = get_relevant_links(url, html_source, self.topics)
             # print(f"Processed: {url}, Links found: {len(topic_url_dict)}")
             return analyzed_topics, topic_url_dict
