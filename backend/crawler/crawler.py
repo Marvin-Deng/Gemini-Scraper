@@ -1,10 +1,10 @@
 from collections import deque
+import threading
 
 from gemini.analyze_content import gemini_analyze_topics
 from gemini.link_extractor import get_relevant_links
 from crawler.utils.soup_utils import get_html_from_url
 from concurrent.futures import ThreadPoolExecutor, as_completed
-import threading
 
 
 class Crawler:
@@ -27,15 +27,15 @@ class Crawler:
             tuple: A tuple analyzed topics.
             dict: A dicitonary of URLs categorized by topic.
         """
-        print(f"Extracting URL: {url}")
+        # print(f"Extracting URL: {url}")
         try:
             html_source = get_html_from_url(url)
-            analyzed_topics = "temp info"
+            analyzed_topics = gemini_analyze_topics(url, html_source, self.topics)
             topic_url_dict = get_relevant_links(url, html_source, self.topics)
-            print(f"Processed: {url}, Links found: {len(topic_url_dict)}")
+            # print(f"Processed: {url}, Links found: {len(topic_url_dict)}")
             return analyzed_topics, topic_url_dict
         except Exception as e:
-            print(f"Error processing URL {url}: {e}")
+            # print(f"Error processing URL {url}: {e}")
             return "", {}
 
     def bfs_crawl(self) -> list:
@@ -49,7 +49,7 @@ class Crawler:
         info = []
         with ThreadPoolExecutor() as executor:
             while self.queue and self.curr_depth > 0:
-                print(f"Processing level {self.curr_depth} with {len(self.queue)} URLs")
+                # print(f"Processing level {self.curr_depth} with {len(self.queue)} URLs")
                 futures = []
                 current_level_urls = list(self.queue)
                 self.queue.clear()
@@ -68,9 +68,8 @@ class Crawler:
                     for topic, urls in topic_url_dict.items():
                         for url in urls:
                             if url not in self.visited:
-                                if url not in self.visited:
-                                    self.queue.append(url)
-                                    self.visited.add(url)
+                                self.queue.append(url)
+                                self.visited.add(url)
                 self.curr_depth -= 1
 
         return info
